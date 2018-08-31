@@ -39,6 +39,7 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
                 <http:query-param paramName="destination" value="#[sessionVars.destination]"/>
             </http:request-builder>
         </http:request>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
     </flow>
 
     <apikit:mapping-exception-strategy name="apiKitGlobalExceptionMapping">
