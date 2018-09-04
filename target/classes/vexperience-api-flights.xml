@@ -14,9 +14,9 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
 
     <http:listener-config name="httpListenerConfig" host="0.0.0.0" port="${http.port}" doc:name="HTTP Listener Configuration"/>
     <apikit:config name="apiConfig" raml="api.raml" consoleEnabled="true" consolePath="console" doc:name="Router" keepRamlBaseUri="false">
-        <apikit:flow-mapping resource="/getBothFlighs" action="get" flow-ref="getBothFlights"/>
-        <apikit:flow-mapping resource="/unitedGeFlights" action="get" flow-ref="getRestFlight"/>
-        <apikit:flow-mapping resource="/deltaGetFlights" action="get" flow-ref="getFlightsProcessFlow"/>
+        <apikit:flow-mapping resource="/flights/united" action="get" flow-ref="united"/>
+        <apikit:flow-mapping resource="/flights/delta-united" action="get" flow-ref="delta-united"/>
+        <apikit:flow-mapping resource="/flights/delta-code" action="get" flow-ref="delta"/>
     </apikit:config>
 
     <context:property-placeholder location="api.properties" />
@@ -26,19 +26,20 @@ http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/m
         <apikit:router config-ref="apiConfig" doc:name="APIkit Router"/>
         <exception-strategy ref="apiKitGlobalExceptionMapping" doc:name="Reference Exception Strategy"/>
     </flow>
-    <flow name="getRestFlight">
-        <http:request config-ref="domain_HTTP_request_Connection" path="process/unitedGeFlights" method="GET" doc:name="HTTP"/>
+    <flow name="united">
+        <http:request config-ref="domain_HTTP_request_Connection" path="process/flights/united" method="GET" doc:name="HTTP"/>
     </flow>
-    <flow name="getBothFlights">
-        <http:request config-ref="domain_HTTP_request_Connection" path="process/getBothFlighs" method="GET" doc:name="HTTP"/>
+    <flow name="delta-united">
+        <http:request config-ref="domain_HTTP_request_Connection" path="process/flights/delta-united" method="GET" doc:name="HTTP"/>
     </flow>
-    <flow name="getFlightsProcessFlow">
+    <flow name="delta">
         <set-session-variable variableName="destination" value="#[message.inboundProperties.'http.query.params'.destination]" doc:name="Session Variable"/>
-        <http:request config-ref="domain_HTTP_request_Connection" path="process/deltaGetFlights" method="GET" doc:name="HTTP">
+        <http:request config-ref="domain_HTTP_request_Connection" path="process/flights/delta-code" method="GET" doc:name="HTTP">
             <http:request-builder>
                 <http:query-param paramName="destination" value="#[sessionVars.destination]"/>
             </http:request-builder>
         </http:request>
+        <logger message="#[payload]" level="INFO" doc:name="Logger"/>
     </flow>
 
     <apikit:mapping-exception-strategy name="apiKitGlobalExceptionMapping">
